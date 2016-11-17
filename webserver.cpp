@@ -6,7 +6,8 @@
 #include <iostream>
 
 
-WebServer::WebServer(const shared_ptr<ILog> log): _log(move(log))
+WebServer::WebServer(const shared_ptr<ILog> log, const shared_ptr<IRouter> &router): _log(move(log)),
+                                                                                  _router(move(router))
 {
 }
 
@@ -15,15 +16,15 @@ string WebServer::parseRequest(const string &req)
     bool found = false;
     string out = "";
 
-    for (size_t i = 0; i < req.size(); i++) {
-        if (req[i] == ' ')
+    for (const auto &sym : req) {
+        if (sym == ' ')
             if (!found)
                 found = true;
             else
                 break;
 
         if (found)
-            out += req[i];
+            out += sym;
     }
     return out;
 }
@@ -42,14 +43,8 @@ void WebServer::newSession(shared_ptr<ITcpClient> client)
         return;
     }
 
-    auto termoClient = make_shared<TermoClient>();
-    auto termoHandler = make_shared<TermoHandler>(termoClient, client, _log, _mtx);
-    auto unknownHandler = make_shared<UnknownHandler>(client, _log, _mtx);
-    auto router = make_shared<Router>(termoHandler, unknownHandler);
-
     req = parseRequest(string(data));
-
-    router->navigate(req);
+    _router->navigate(req, client, _mtx);
 }
 
 void WebServer::acceptError() const

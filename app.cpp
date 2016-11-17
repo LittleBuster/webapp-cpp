@@ -24,7 +24,7 @@ int App::start()
 
     cout << "Starting WebServer..." << endl;
     try {
-        _wserver->start(sc.port);
+        _wserver->start(sc.port, 200);
     }
     catch (...) {
         _log->local("Fail binding WebServer!", LOG_ERROR);

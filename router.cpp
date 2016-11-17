@@ -1,34 +1,45 @@
 #include "router.h"
+#include "ext.h"
 #include <functional>
 #include <vector>
 #include <iostream>
-#include <boost/algorithm/string.hpp>
 
+
+void Router::addModule(const string &name, const shared_ptr<IHandler> &module)
+{
+    _reqs.insert(make_pair(name, module));
+    _modules.push_back(name);
+}
+
+bool Router::checkModuleExists(const string &name)
+{
+    for (const auto &module : _modules)
+        if (name == module)
+            return true;
+    return false;
+}
 
 Router::Router(const shared_ptr<IHandler> &termo, const shared_ptr<IHandler> &unknown)
 {
-    _reqs.insert(make_pair("termo", termo));
-    _reqs.insert(make_pair("unknown", unknown));
+    addModule("termo", termo);
+    addModule("unknown", unknown);
 }
 
-bool Router::navigate(const string &request)
+bool Router::navigate(const string &request, const shared_ptr<ITcpClient> &client, mutex &mtx)
 {
     vector<string> first;
     vector<string> res;
 
     try {
-        boost::split(first, request, boost::is_any_of("/"));
-        if (first.size() <= 1) {
-            _reqs["unknown"]->handler("");
-            return false;
-        }
-        boost::split(res, first[1], boost::is_any_of("?"));
-        if (res.size() <= 1) {
-            _reqs["unknown"]->handler("");
-            return false;
-        }
+        ext::split_string(request, '/', first);
+        ext::split_string(first[1], '?', res);
     }
     catch (...) {
+        _reqs["unknown"]->handler("");
+        return false;
+    }
+
+    if (!checkModuleExists(res[0])) {
         _reqs["unknown"]->handler("");
         return false;
     }

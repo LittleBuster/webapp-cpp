@@ -5,10 +5,8 @@
 
 
 TermoHandler::TermoHandler(const shared_ptr<ITermoClient> &termo,
-                           const shared_ptr<ITcpClient> &client,
-                           const shared_ptr<ILog> log, mutex &mtx):
-                           _termo(move(termo)), _client(move(client)),
-                           _log(move(log)), _mtx(mtx)
+                           const shared_ptr<ILog> log):
+                           _termo(move(termo)), _log(move(log))
 {
 }
 
@@ -23,13 +21,14 @@ bool TermoHandler::simpleAnsware(bool result)
         answ += "fail\"}";
 
     try {
-        _client->send(answ.c_str(), answ.length());
+       // _client->send(answ.c_str(), answ.length());
     } catch(const string &err) {
-        _mtx.lock();
+       // _mtx.lock();
         _log->local("Termo(H): " + err, LOG_ERROR);
-        _mtx.unlock();
+      //  _mtx.unlock();
         return false;
     }
+    return true;
 }
 
 bool TermoHandler::tempAnsware(float temp)
@@ -40,11 +39,11 @@ bool TermoHandler::tempAnsware(float temp)
                   + boost::lexical_cast<string>(temp) + "}";
 
     try {
-        _client->send(answ.c_str(), answ.length());
+      //  _client->send(answ.c_str(), answ.length());
     } catch(const string &err) {
-        _mtx.lock();
+       // _mtx.lock();
         _log->local("Termo(H): " + err, LOG_ERROR);
-        _mtx.unlock();
+       // _mtx.unlock();
         return false;
     }
     return true;
@@ -61,15 +60,15 @@ void TermoHandler::handler(const string &req)
             mt = _termo->getMaxTemp();
         }
         catch (const string &err) {
-            _mtx.lock();
+          //  _mtx.lock();
             _log->local("Termo(C): fail getting max temperature.", LOG_ERROR);
-            _mtx.unlock();
+           // _mtx.unlock();
             return;
         }
         if (!tempAnsware(mt)) {
-            _mtx.lock();
+          //  _mtx.lock();
             _log->local("Fail sending temp answare.", LOG_ERROR);
-            _mtx.unlock();
+          //  _mtx.unlock();
         }
         return;
     }
@@ -78,14 +77,14 @@ void TermoHandler::handler(const string &req)
         boost::split(args, req, boost::is_any_of("="));
     }
     catch(...) {
-        _mtx.lock();
+       // _mtx.lock();
         _log->local("Fail parsing termo request.", LOG_ERROR);
-        _mtx.unlock();
+       // _mtx.unlock();
 
         if (!simpleAnsware(false)) {
-            _mtx.lock();
+            //_mtx.lock();
             _log->local("Fail sending temp answare.", LOG_ERROR);
-            _mtx.unlock();
+            //_mtx.unlock();
         }
         return;
     }
@@ -97,14 +96,14 @@ void TermoHandler::handler(const string &req)
             newTemp = boost::lexical_cast<float>(args[1]);
         }
         catch (...) {
-            _mtx.lock();
+        //    _mtx.lock();
             _log->local("Fail parsing max temperature", LOG_ERROR);
-            _mtx.unlock();
+         //   _mtx.unlock();
 
             if (!simpleAnsware(false)) {
-                _mtx.lock();
+          //      _mtx.lock();
                 _log->local("Fail sending temp answare.", LOG_ERROR);
-                _mtx.unlock();
+          //      _mtx.unlock();
             }
             return;
         }
@@ -114,28 +113,28 @@ void TermoHandler::handler(const string &req)
         }
         catch (...) {
             if (!simpleAnsware(false)) {
-                _mtx.lock();
+           //     _mtx.lock();
                 _log->local("Fail sending temp answare.", LOG_ERROR);
-                _mtx.unlock();
+           //     _mtx.unlock();
             }
             return;
         }
         if (!simpleAnsware(true)) {
-            _mtx.lock();
+           // _mtx.lock();
             _log->local("Fail sending temp answare.", LOG_ERROR);
-            _mtx.unlock();
+           // _mtx.unlock();
         }
         return;
     }
 
-    _mtx.lock();
+  //  _mtx.lock();
     _log->local("Unknown termo request.", LOG_WARNING);
-    _mtx.unlock();
+   // _mtx.unlock();
 
     if (!simpleAnsware(false)) {
-        _mtx.lock();
+       // _mtx.lock();
         _log->local("Fail sending temp answare.", LOG_ERROR);
-        _mtx.unlock();
+       // _mtx.unlock();
     }
     return;
 }

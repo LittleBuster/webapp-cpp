@@ -3,9 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 
-UnknownHandler::UnknownHandler(const shared_ptr<ITcpClient> &client,
-                           const shared_ptr<ILog> log, mutex &mtx):
-                           _client(move(client)), _log(move(log)), _mtx(mtx)
+UnknownHandler::UnknownHandler(const shared_ptr<ILog> log): _log(move(log))
 {
 }
 
@@ -16,16 +14,16 @@ void UnknownHandler::handler(const string &req)
                   "{\"module\": \"404\", \"result\": \"fail\"}";
 
     try {
-        _client->send(answ.c_str(), answ.length());
+        //_client->send(answ.c_str(), answ.length());
     } catch(const string &err) {
-        _mtx.lock();
+       // _mtx.lock();
         _log->local("Unknown(H): " + err, LOG_ERROR);
-        _mtx.unlock();
+     //   _mtx.unlock();
         return;
     }
 
-    _mtx.lock();
+   // _mtx.lock();
     cout << "Unknown request 404." << endl;
-    _mtx.unlock();
+   // _mtx.unlock();
     return;
 }

@@ -6,8 +6,7 @@
 #include "tcpclient.h"
 #include "log.h"
 #include <memory>
-#include <mutex>
-#include <tuple>
+#include <vector>
 
 using namespace std;
 
@@ -15,9 +14,7 @@ using namespace std;
 class TermoHandler: public IHandler
 {
 private:
-    mutex &_mtx;
     const shared_ptr<ITermoClient> _termo;
-    const shared_ptr<ITcpClient> _client;
     const shared_ptr<ILog> _log;
 
     bool simpleAnsware(bool result);
@@ -28,9 +25,7 @@ private:
 
 public:
     explicit TermoHandler(const shared_ptr<ITermoClient> &termo,
-                          const shared_ptr<ITcpClient> &client,
-                          const shared_ptr<ILog> log,
-                          mutex &mtx);
+                          const shared_ptr<ILog> log);
 
     void handler(const string &req);
 };

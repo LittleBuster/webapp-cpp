@@ -3,12 +3,17 @@
 
 #include <memory>
 #include <thread>
+#include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
 #include "tcpclient.h"
-#include <boost/bind.hpp>
-#include <boost/asio.hpp>
+
 
 using namespace std;
-using boost::asio::ip::tcp;
 
 
 class ITcpServer
@@ -16,15 +21,14 @@ class ITcpServer
 public:
     virtual void newSession(shared_ptr<ITcpClient> client) = 0;
     virtual void acceptError(void) const = 0;
-    virtual void start(unsigned port) = 0;
+    virtual void start(unsigned port, unsigned maxClients) = 0;
 };
 
 
 class TcpServer: public ITcpServer
 {
 private:
-    boost::asio::io_service _service;
-    shared_ptr<tcp::acceptor> _acpt;
+    SOCKET _sock;
 
 public:
     /*
@@ -43,7 +47,7 @@ public:
      *
      * throw: error if fail binding
      */
-    void start(unsigned port);
+    void start(unsigned port, unsigned maxClients);
 };
 
 

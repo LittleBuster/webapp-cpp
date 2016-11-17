@@ -2,10 +2,12 @@
 #define __TCPCLIENT_H__
 
 #include <memory>
-#include <boost/asio.hpp>
 
 using namespace std;
-using boost::asio::ip::tcp;
+
+#define INVALID_SOCKET (SOCKET)(~0)
+#define SOCKET_ERROR (-1)
+#define SOCKET int
 
 
 class ITcpClient
@@ -21,13 +23,10 @@ public:
 class TcpClient: public ITcpClient
 {
 private:
-    boost::asio::io_service _service;
-    shared_ptr<tcp::socket> _client;
+    SOCKET _client;
 
 public:
-    explicit TcpClient();
-
-    explicit TcpClient(const shared_ptr<tcp::socket> &parent_client);
+    explicit TcpClient(SOCKET sock);
 
     /**
      * Connect to remote server

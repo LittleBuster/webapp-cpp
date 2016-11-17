@@ -3,7 +3,7 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-LIBS += -lboost_system -lpthread
+LIBS +=-lpthread
 
 SOURCES += main.cpp \
     app.cpp \
@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     clients/termoclient.cpp \
     handlers/termohandler.cpp \
     handlers/unknownhandler.cpp \
-    configs.cpp
+    configs.cpp \
+    ext.cpp
 
 HEADERS += \
     app.h \
@@ -28,4 +29,5 @@ HEADERS += \
     handlers/ihandler.h \
     handlers/termohandler.h \
     handlers/unknownhandler.h \
-    configs.h
+    configs.h \
+    ext.h

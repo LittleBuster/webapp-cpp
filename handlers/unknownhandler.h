@@ -13,14 +13,10 @@ using namespace std;
 class UnknownHandler: public IHandler
 {
 private:
-    mutex &_mtx;
-    const shared_ptr<ITcpClient> _client;
     const shared_ptr<ILog> _log;
 
 public:
-    explicit UnknownHandler(const shared_ptr<ITcpClient> &client,
-                          const shared_ptr<ILog> log,
-                          mutex &mtx);
+    explicit UnknownHandler(const shared_ptr<ILog> log);
 
     void handler(const string &req);
 };
