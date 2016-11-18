@@ -1,7 +1,6 @@
 #include "termohandler.h"
+#include "ext.h"
 #include <iostream>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 
 
 TermoHandler::TermoHandler(const shared_ptr<ITermoClient> &termo,
@@ -10,7 +9,7 @@ TermoHandler::TermoHandler(const shared_ptr<ITermoClient> &termo,
 {
 }
 
-bool TermoHandler::simpleAnsware(bool result)
+void TermoHandler::simpleAnsware(bool result, const shared_ptr<ITcpClient> &client)
 {
     string answ = "HTTP/1.1 200 OK\r\n"
                   "Content-Type: application/json; charset=UTF-8\r\n\r\n"
@@ -20,36 +19,20 @@ bool TermoHandler::simpleAnsware(bool result)
     else
         answ += "fail\"}";
 
-    try {
-       // _client->send(answ.c_str(), answ.length());
-    } catch(const string &err) {
-       // _mtx.lock();
-        _log->local("Termo(H): " + err, LOG_ERROR);
-      //  _mtx.unlock();
-        return false;
-    }
-    return true;
+    client->send(answ.c_str(), answ.length());
 }
 
-bool TermoHandler::tempAnsware(float temp)
+void TermoHandler::tempAnsware(float temp, const shared_ptr<ITcpClient> &client)
 {
     string answ = "HTTP/1.1 200 OK\r\n"
                   "Content-Type: application/json; charset=UTF-8\r\n\r\n"
                   "{\"module\": \"termo\", \"result\": \"ok\", \"temp\": "
-                  + boost::lexical_cast<string>(temp) + "}";
+                  + ext::ftoa(temp) + "}";
 
-    try {
-      //  _client->send(answ.c_str(), answ.length());
-    } catch(const string &err) {
-       // _mtx.lock();
-        _log->local("Termo(H): " + err, LOG_ERROR);
-       // _mtx.unlock();
-        return false;
-    }
-    return true;
+    client->send(answ.c_str(), answ.length());
 }
 
-void TermoHandler::handler(const string &req)
+void TermoHandler::handler(const string &req, const shared_ptr<ITcpClient> &client, mutex &mtx)
 {
     vector<string> args;
 
@@ -60,31 +43,37 @@ void TermoHandler::handler(const string &req)
             mt = _termo->getMaxTemp();
         }
         catch (const string &err) {
-          //  _mtx.lock();
+            mtx.lock();
             _log->local("Termo(C): fail getting max temperature.", LOG_ERROR);
-           // _mtx.unlock();
+            mtx.unlock();
             return;
         }
-        if (!tempAnsware(mt)) {
-          //  _mtx.lock();
-            _log->local("Fail sending temp answare.", LOG_ERROR);
-          //  _mtx.unlock();
+        try {
+            tempAnsware(mt, client);
+        }
+        catch (const string &err) {
+            mtx.lock();
+            _log->local("Fail sending temp answare: " + err, LOG_ERROR);
+            mtx.unlock();
         }
         return;
     }
 
     try {
-        boost::split(args, req, boost::is_any_of("="));
+        ext::split_string(req, '=', args);
     }
     catch(...) {
-       // _mtx.lock();
+        mtx.lock();
         _log->local("Fail parsing termo request.", LOG_ERROR);
-       // _mtx.unlock();
+        mtx.unlock();
 
-        if (!simpleAnsware(false)) {
-            //_mtx.lock();
-            _log->local("Fail sending temp answare.", LOG_ERROR);
-            //_mtx.unlock();
+        try {
+            simpleAnsware(false, client);
+        }
+        catch (const string &err) {
+            mtx.lock();
+            _log->local("Fail sending temp answare: " + err, LOG_ERROR);
+            mtx.unlock();
         }
         return;
     }
@@ -93,17 +82,20 @@ void TermoHandler::handler(const string &req)
         float newTemp;
 
         try {
-            newTemp = boost::lexical_cast<float>(args[1]);
+            newTemp = atof(args[1].c_str());
         }
         catch (...) {
-        //    _mtx.lock();
-            _log->local("Fail parsing max temperature", LOG_ERROR);
-         //   _mtx.unlock();
+            mtx.lock();
+            _log->local("Fail parsing max temperature.", LOG_ERROR);
+            mtx.unlock();
 
-            if (!simpleAnsware(false)) {
-          //      _mtx.lock();
-                _log->local("Fail sending temp answare.", LOG_ERROR);
-          //      _mtx.unlock();
+            try {
+                simpleAnsware(false, client);
+            }
+            catch (const string &err) {
+                mtx.lock();
+                _log->local("Fail sending temp answare: " + err, LOG_ERROR);
+                mtx.unlock();
             }
             return;
         }
@@ -112,29 +104,37 @@ void TermoHandler::handler(const string &req)
             _termo->setMaxTemp(newTemp);
         }
         catch (...) {
-            if (!simpleAnsware(false)) {
-           //     _mtx.lock();
-                _log->local("Fail sending temp answare.", LOG_ERROR);
-           //     _mtx.unlock();
+            try {
+                simpleAnsware(false, client);
+            }
+            catch (const string &err) {
+                mtx.lock();
+                _log->local("Fail sending temp answare: " + err, LOG_ERROR);
+                mtx.unlock();
             }
             return;
         }
-        if (!simpleAnsware(true)) {
-           // _mtx.lock();
-            _log->local("Fail sending temp answare.", LOG_ERROR);
-           // _mtx.unlock();
+        try {
+            simpleAnsware(true, client);
+        }
+        catch (const string &err) {
+            mtx.lock();
+            _log->local("Fail sending temp answare: " + err, LOG_ERROR);
+            mtx.unlock();
         }
         return;
     }
 
-  //  _mtx.lock();
+    mtx.lock();
     _log->local("Unknown termo request.", LOG_WARNING);
-   // _mtx.unlock();
+    mtx.unlock();
 
-    if (!simpleAnsware(false)) {
-       // _mtx.lock();
-        _log->local("Fail sending temp answare.", LOG_ERROR);
-       // _mtx.unlock();
+    try {
+        simpleAnsware(false, client);
     }
-    return;
+    catch (const string &err) {
+        mtx.lock();
+        _log->local("Fail sending temp answare: " + err, LOG_ERROR);
+        mtx.unlock();
+    }
 }

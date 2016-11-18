@@ -17,9 +17,9 @@ private:
     const shared_ptr<ITermoClient> _termo;
     const shared_ptr<ILog> _log;
 
-    bool simpleAnsware(bool result);
+    void simpleAnsware(bool result, const shared_ptr<ITcpClient> &client);
 
-    bool tempAnsware(float temp);
+    void tempAnsware(float temp, const shared_ptr<ITcpClient> &client);
 
     vector<string> parseRequest(const string &req);
 
@@ -27,7 +27,7 @@ public:
     explicit TermoHandler(const shared_ptr<ITermoClient> &termo,
                           const shared_ptr<ILog> log);
 
-    void handler(const string &req);
+    void handler(const string &req, const shared_ptr<ITcpClient> &client, mutex &mtx);
 };
 
 

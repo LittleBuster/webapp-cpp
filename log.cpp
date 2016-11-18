@@ -1,7 +1,7 @@
 #include "log.h"
+#include "ext.h"
 #include <iostream>
 #include <fstream>
-#include <boost/date_time.hpp>
 
 
 Log::Log(): _logPath("")
@@ -12,8 +12,7 @@ string Log::makeLogMsg(const string &msg, const LogType type) const
 {
     string out;
 
-    const auto &dt = boost::posix_time::second_clock::local_time();
-    out = "[" + boost::lexical_cast<string>(dt.date()) + "][" + boost::lexical_cast<string>(dt.time_of_day()) + "][";
+    out = "[" + ext::current_datetime() + "][";
 
     switch (type) {
         case LOG_ERROR: {

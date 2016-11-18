@@ -24,6 +24,10 @@ class Configs: public IConfigs
 private:
     ServerCfg sc;
 
+    string readString(ifstream &is) const;
+
+    int readInt(ifstream &is) const;
+
 public:
     inline const ServerCfg& getServerCfg(void) const { return sc; }
 

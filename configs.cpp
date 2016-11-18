@@ -1,29 +1,65 @@
 #include "configs.h"
 #include <fstream>
 #include <iostream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+
+
+string Configs::readString(ifstream &is) const
+{
+    char line[255];
+    bool isFind = false;
+    string out = "";
+
+    while (1) {
+        is.getline(line, 255);
+        if (line[0] != '#' || line[0] != '/')
+            break;
+    }
+
+    for (const auto &sym : line) {
+        if (sym == '=') {
+            isFind = true;
+            continue;
+        }
+        if (isFind && sym != ' ')
+            out += sym;
+    }
+    return out;
+}
+
+int Configs::readInt(ifstream &is) const
+{
+    char line[255];
+    bool isFind = false;
+    string out = "";
+
+    while (1) {
+        is.getline(line, 255);
+        if (line[0] != '#' || line[0] != '/')
+            break;
+    }
+
+    for (const auto &sym : line) {
+        if (sym == '=') {
+            isFind = true;
+            continue;
+        }
+        if (isFind && sym != ' ')
+            out += sym;
+    }
+    return atoi(out.c_str());
+}
 
 
 void Configs::load(const string &filename)
 {
-    std::ifstream ifs;
-    boost::property_tree::ptree pt;
+    ifstream ifs;
 
     ifs.open(filename);
     if (!ifs.is_open())
         throw string("File not found.");
 
     try {
-        boost::property_tree::read_json(ifs, pt);
-    }
-    catch (...) {
-        ifs.close();
-        throw string("Fail parsing json file.");
-    }
-
-    try {
-        sc.port = pt.get<unsigned>("Server.Port");
+        sc.port = static_cast<unsigned>(readInt(ifs));
     }
     catch (...) {
         ifs.close();

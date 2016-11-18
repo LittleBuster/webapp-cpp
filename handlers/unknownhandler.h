@@ -18,7 +18,7 @@ private:
 public:
     explicit UnknownHandler(const shared_ptr<ILog> log);
 
-    void handler(const string &req);
+    void handler(const string &req, const shared_ptr<ITcpClient> &client, mutex &mtx);
 };
 
 

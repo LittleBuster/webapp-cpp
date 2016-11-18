@@ -35,15 +35,15 @@ bool Router::navigate(const string &request, const shared_ptr<ITcpClient> &clien
         ext::split_string(first[1], '?', res);
     }
     catch (...) {
-        _reqs["unknown"]->handler("");
+        _reqs["unknown"]->handler("", client, mtx);
         return false;
     }
 
     if (!checkModuleExists(res[0])) {
-        _reqs["unknown"]->handler("");
+        _reqs["unknown"]->handler("", client, mtx);
         return false;
     }
 
-    _reqs[res[0]]->handler(res[1]);
+    _reqs[res[0]]->handler(res[1], client, mtx);
     return true;
 }
