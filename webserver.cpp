@@ -17,11 +17,14 @@ string WebServer::parseRequest(const string &req)
     string out = "";
 
     for (const auto &sym : req) {
-        if (sym == ' ')
-            if (!found)
+        if (sym == ' ') {
+            if (!found) {
                 found = true;
-            else
+            }
+            else {
                 break;
+            }
+        }
 
         if (found)
             out += sym;

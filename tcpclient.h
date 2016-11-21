@@ -26,7 +26,9 @@ private:
     SOCKET _client;
 
 public:
-    explicit TcpClient(SOCKET sock);
+    TcpClient();
+
+    TcpClient(SOCKET sock);
 
     /**
      * Connect to remote server

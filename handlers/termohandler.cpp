@@ -1,11 +1,11 @@
 #include "termohandler.h"
 #include "ext.h"
+#include "configs.h"
 #include <iostream>
 
 
-TermoHandler::TermoHandler(const shared_ptr<ITermoClient> &termo,
-                           const shared_ptr<ILog> log):
-                           _termo(move(termo)), _log(move(log))
+TermoHandler::TermoHandler(const shared_ptr<IConfigs> &cfg, const shared_ptr<ILog> log):
+    _cfg(move(cfg)), _log(move(log))
 {
 }
 
@@ -35,12 +35,16 @@ void TermoHandler::tempAnsware(float temp, const shared_ptr<ITcpClient> &client)
 void TermoHandler::handler(const string &req, const shared_ptr<ITcpClient> &client, mutex &mtx)
 {
     vector<string> args;
+    const auto &hsc = _cfg->getHouseCfg();
+    shared_ptr<ITermoClient> termo = make_shared<TermoClient>();
 
     if (req == "get_temp") {
         float mt;
 
         try {
-            mt = _termo->getMaxTemp();
+            termo->connect(hsc.ip, hsc.port);
+            mt = termo->getMaxTemp();
+            termo->close();
         }
         catch (const string &err) {
             mtx.lock();
@@ -101,7 +105,9 @@ void TermoHandler::handler(const string &req, const shared_ptr<ITcpClient> &clie
         }
 
         try {
-            _termo->setMaxTemp(newTemp);
+            termo->connect(hsc.ip, hsc.port);
+            termo->setMaxTemp(newTemp);
+            termo->close();
         }
         catch (...) {
             try {

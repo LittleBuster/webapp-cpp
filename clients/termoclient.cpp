@@ -4,8 +4,9 @@
 using namespace std;
 
 
-TermoClient::TermoClient()
+void TermoClient::connect(const string &ip, unsigned port)
 {
+    TcpClient::connect(ip, port);
 }
 
 void TermoClient::setMaxTemp(float temp)
@@ -16,7 +17,12 @@ void TermoClient::setMaxTemp(float temp)
     cout << "Termo (C): Temperature was setted." << endl;
 }
 
-float TermoClient::getMaxTemp()
+float TermoClient::getMaxTemp() const
 {
     return 22.1f;
+}
+
+void TermoClient::close() const
+{
+    TcpClient::close();
 }

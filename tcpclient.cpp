@@ -8,6 +8,10 @@
 #include <string.h>
 
 
+TcpClient::TcpClient()
+{
+}
+
 TcpClient::TcpClient(SOCKET sock)
 {
     _client = sock;
@@ -41,7 +45,7 @@ void TcpClient::send(const void *data, size_t len) const
         if (retVal == SOCKET_ERROR)
             throw string("Fail sending data.");
 
-        if (retVal == (int)len)
+        if (retVal == static_cast<int>(len))
             break;
     }
 }

@@ -11,7 +11,7 @@ string Configs::readString(ifstream &is) const
 
     while (1) {
         is.getline(line, 255);
-        if (line[0] != '#' || line[0] != '/')
+        if (line[0] != '#' || line[0] != '/' || line[0] != '\n')
             break;
     }
 
@@ -34,7 +34,7 @@ int Configs::readInt(ifstream &is) const
 
     while (1) {
         is.getline(line, 255);
-        if (line[0] != '#' || line[0] != '/')
+        if (line[0] != '#' || line[0] != '/' || line[0] != '\n')
             break;
     }
 
@@ -60,6 +60,8 @@ void Configs::load(const string &filename)
 
     try {
         sc.port = static_cast<unsigned>(readInt(ifs));
+        hsc.ip = readString(ifs);
+        hsc.port = static_cast<unsigned>(readInt(ifs));
     }
     catch (...) {
         ifs.close();
