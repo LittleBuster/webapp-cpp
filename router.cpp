@@ -1,3 +1,15 @@
+/* Webapp test application
+ *
+ * Copyright (C) 2016 Sergey Denisov.
+ * Written by Sergey Denisov aka LittleBuster (DenisovS21@gmail.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public Licence 3
+ * as published by the Free Software Foundation; either version 3
+ * of the Licence, or (at your option) any later version.
+ */
+
+
 #include "router.h"
 #include "ext.h"
 #include <functional>
@@ -27,23 +39,22 @@ Router::Router(const shared_ptr<IHandler> &termo, const shared_ptr<IHandler> &un
 
 bool Router::navigate(const string &request, const shared_ptr<ITcpClient> &client, mutex &mtx)
 {
-    vector<string> first;
-    vector<string> res;
+    tuple<string, string> first, second;
 
     try {
-        ext::split_string(request, '/', first);
-        ext::split_string(first[1], '?', res);
+        first = ext::split_string(request, '/');
+        second = ext::split_string(get<1>(first), '?');
     }
     catch (...) {
         _reqs["unknown"]->handler("", client, mtx);
         return false;
     }
 
-    if (!checkModuleExists(res[0])) {
+    if (!checkModuleExists(get<0>(second))) {
         _reqs["unknown"]->handler("", client, mtx);
         return false;
     }
 
-    _reqs[res[0]]->handler(res[1], client, mtx);
+    _reqs[get<0>(second)]->handler(get<1>(second), client, mtx);
     return true;
 }

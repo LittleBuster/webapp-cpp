@@ -1,3 +1,15 @@
+/* Webapp test application
+ *
+ * Copyright (C) 2016 Sergey Denisov.
+ * Written by Sergey Denisov aka LittleBuster (DenisovS21@gmail.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public Licence 3
+ * as published by the Free Software Foundation; either version 3
+ * of the Licence, or (at your option) any later version.
+ */
+
+
 #include "ext.h"
 #include <sstream>
 
@@ -5,7 +17,7 @@
 namespace ext {
 
 
-void split_string(const string &str, char sym, vector<string> &out)
+tuple<string, string> split_string(const string &str, char sym)
 {
     bool isFind = false;
     string out1 = "";
@@ -30,8 +42,7 @@ void split_string(const string &str, char sym, vector<string> &out)
     if (out1 == "" || out2 == "")
         throw string("Incorrect string for splitting.");
 
-    out.push_back(out1);
-    out.push_back(out2);
+    return make_tuple(out1, out2);
 }
 
 const string current_datetime()

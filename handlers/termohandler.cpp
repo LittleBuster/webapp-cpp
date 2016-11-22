@@ -1,3 +1,15 @@
+/* Webapp test application
+ *
+ * Copyright (C) 2016 Sergey Denisov.
+ * Written by Sergey Denisov aka LittleBuster (DenisovS21@gmail.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public Licence 3
+ * as published by the Free Software Foundation; either version 3
+ * of the Licence, or (at your option) any later version.
+ */
+
+
 #include "termohandler.h"
 #include "ext.h"
 #include "configs.h"
@@ -34,7 +46,7 @@ void TermoHandler::tempAnsware(float temp, const shared_ptr<ITcpClient> &client)
 
 void TermoHandler::handler(const string &req, const shared_ptr<ITcpClient> &client, mutex &mtx)
 {
-    vector<string> args;
+    tuple<string, string> args;
     const auto &hsc = _cfg->getHouseCfg();
     shared_ptr<ITermoClient> termo = make_shared<TermoClient>();
 
@@ -64,7 +76,7 @@ void TermoHandler::handler(const string &req, const shared_ptr<ITcpClient> &clie
     }
 
     try {
-        ext::split_string(req, '=', args);
+        args = ext::split_string(req, '=');
     }
     catch(...) {
         mtx.lock();
@@ -82,11 +94,11 @@ void TermoHandler::handler(const string &req, const shared_ptr<ITcpClient> &clie
         return;
     }
 
-    if (args[0] == "temp_set") {
+    if (get<0>(args) == "temp_set") {
         float newTemp;
 
         try {
-            newTemp = atof(args[1].c_str());
+            newTemp = atof(get<1>(args).c_str());
         }
         catch (...) {
             mtx.lock();
