@@ -12,7 +12,6 @@
 
 #include "unknownhandler.h"
 #include <iostream>
-#include <boost/lexical_cast.hpp>
 
 
 UnknownHandler::UnknownHandler(const shared_ptr<ILog> log): _log(move(log))

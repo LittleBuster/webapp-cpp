@@ -21,11 +21,11 @@ public:
     virtual void connect(const string &ip, unsigned port)=0;
     virtual void setMaxTemp(float temp)=0;
     virtual float getMaxTemp() const=0;
-    virtual void close(void) const= 0;
+    virtual void close(void) const=0;
 };
 
 
-class TermoClient: public ITermoClient, public TcpClient
+class TermoClient: public ITermoClient, private TcpClient
 {
 public:
     /**
