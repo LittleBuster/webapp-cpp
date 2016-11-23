@@ -24,19 +24,20 @@ string Log::makeLogMsg(const string &msg, const LogType type) const
 {
     string out;
 
-    out = "[" + ext::current_datetime() + "][";
+    const auto &dt = ext::split_string(ext::current_datetime(), '.');
+    out = "[" + get<0>(dt) + "][" + get<1>(dt) + "][";
 
     switch (type) {
         case LOG_ERROR: {
-            out += "ERROR]";
+            out += "ERROR] ";
             break;
         }
         case LOG_WARNING: {
-            out += "WARNING]";
+            out += "WARNING] ";
             break;
         }
         case LOG_INFORMATION: {
-            out += "INFO]";
+            out += "INFO] ";
             break;
         }
     }
